@@ -1,0 +1,14 @@
+FROM python:slim-bullseye AS build-env
+
+WORKDIR /app
+COPY . /app
+
+RUN pip install -r /app/requirements.txt
+
+FROM gcr.io/distroless/python3
+
+COPY --from=build-env /app /app
+COPY --from=build-env /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+
+WORKDIR /app
+ENTRYPOINT ["uvicorn", "main:app", "--app-dir", "app/src/app", "--host", "0.0.0.0"]
